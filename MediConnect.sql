@@ -1,6 +1,6 @@
-drop database if exists MediConnect;
-create database MediConnect;
-use MediConnect;
+DROP DATABASE IF EXISTS MediConnect;
+CREATE DATABASE MediConnect;
+USE MediConnect;
 
 CREATE TABLE Doctor (
     DocID INT PRIMARY KEY NOT NULL,
@@ -79,7 +79,6 @@ CREATE TABLE Appointment (
     Date DATE,
     Time TIME,
     FOREIGN KEY (DoctorID) REFERENCES Doctor(DocID),
-    FOREIGN KEY (ClerkID) REFERENCES Clerk(CID),
     FOREIGN KEY (PatientID) REFERENCES Patient(PID)
 );
 
@@ -269,19 +268,67 @@ VALUES
     (2, 9),
     (3, 11);
     
-INSERT INTO Appointment (DoctorID, ClerkID, PatientID, Date, Time)
+INSERT INTO Appointment (DoctorID, PatientID, Date, Time)
 VALUES
-    (3, 3, 8, '2024-04-16', '08:00:00'),
-    (7, 1, 1, '2024-04-16', '09:00:00'),
-    (1, 2, 12, '2024-04-16', '10:00:00'),
-    (4, 3, 10, '2024-04-16', '11:00:00'),
-    (2, 1, 7, '2024-04-16', '12:00:00'),
-    (5, 2, 9, '2024-04-16', '13:00:00'),
-    (8, 3, 5, '2024-04-16', '14:00:00'),
-    (6, 1, 3, '2024-04-16', '15:00:00'),
-    (5, 3, 6, '2024-04-17', '08:00:00'),
-    (1, 2, 11, '2024-04-17', '09:00:00'),
-    (3, 1, 13, '2024-04-17', '10:00:00'),
-    (2, 2, 2, '2024-04-17', '11:00:00'),
-    (7, 3, 4, '2024-04-17', '12:00:00'),
-    (4, 1, 14, '2024-04-17', '13:00:00');
+    (3, 8, '2024-04-16', '08:00:00'),
+    (7, 1, '2024-04-16', '09:00:00'),
+    (1, 12, '2024-04-16', '10:00:00'),
+    (4, 10, '2024-04-16', '11:00:00'),
+    (2, 7, '2024-04-16', '12:00:00'),
+    (5, 9, '2024-04-16', '13:00:00'),
+    (8, 5, '2024-04-16', '14:00:00'),
+    (6, 3, '2024-04-16', '15:00:00'),
+    (5, 6, '2024-04-17', '08:00:00'),
+    (1, 11, '2024-04-17', '09:00:00'),
+    (3, 13, '2024-04-17', '10:00:00'),
+    (2, 2, '2024-04-17', '11:00:00'),
+    (7, 4, '2024-04-17', '12:00:00'),
+    (4, 14, '2024-04-17', '13:00:00');
+    
+CREATE VIEW DoctorView AS
+SELECT 
+    MedicalRecords.RecordID AS MedicalRecordID,
+    MedicalRecords.Date AS MedicalRecordDate,
+    MedicalRecords.Time AS MedicalRecordTime,
+    MedicalRecords.Diagnosis AS MedicalRecordDiagnosis,
+    Patient.PID AS PatientID,
+    Patient.FName AS PatientFirstName,
+    Patient.LName AS PatientLastName,
+    Patient.DOB AS PatientDOB,
+    Patient.Sex AS PatientSex,
+    Patient.Insurance AS PatientInsurance,
+    Appointment.Date AS AppointmentDate,
+    Appointment.Time AS AppointmentTime,
+    Nurse.FName AS NurseFirstName,
+    Nurse.LName AS NurseLastName
+FROM 
+    MedicalRecords
+    INNER JOIN Patient ON MedicalRecords.PatientID = Patient.PID
+    LEFT JOIN Nurse ON MedicalRecords.PatientID = Nurse.NID
+    LEFT JOIN Appointment ON MedicalRecords.PatientID = Appointment.PatientID;
+    
+CREATE VIEW NurseView AS
+SELECT *
+FROM MedicalRecords
+INNER JOIN Patient ON MedicalRecords.PatientID = Patient.PID;
+
+CREATE VIEW ClerkView AS
+SELECT 
+    Patient.*,
+    Insurance.PolicyNo,
+    Insurance.Company AS InsuranceCompany,
+    Insurance.Plan AS InsurancePlan,
+    Treats.*
+FROM 
+    Patient
+    LEFT JOIN Insurance ON Patient.PID = Insurance.PatientID
+    LEFT JOIN Treats ON Patient.PID = Treats.PatientID;
+    
+CREATE VIEW PatientView AS
+SELECT 
+    Appointment.Date AS AppointmentDate,
+    Appointment.Time AS AppointmentTime,
+    CONCAT(Doctor.FName, ' ', Doctor.LName) AS DoctorName
+FROM 
+    Appointment
+    INNER JOIN Doctor ON Appointment.DoctorID = Doctor.DocID;
