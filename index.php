@@ -9,10 +9,14 @@
 <body>
     <div class="container">
         <h1>Welcome to MediConnect</h1>
-        <p>This is a simple website to connect to the MediConnect database.</p>
+        <p></p>
         <a href="patients.php">View Patients</a>
         <a href="doctors.php">View Doctors</a>
         <a href="appointments.php">View Appointments</a>
+        <a href="medical_records.php">View Medical Records</a>
+        <a href="patient_search.php">Patient Search</a>
+
+
     </div>
 </body>
 </html>
